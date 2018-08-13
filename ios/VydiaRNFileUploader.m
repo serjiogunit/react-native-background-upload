@@ -154,7 +154,10 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
     NSDictionary *parameters = options[@"parameters"];
 
     @try {
-        NSURL *requestUrl = [NSURL URLWithString: uploadUrl];
+        // deprecated method NSString* webStringURL = [uploadUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSCharacterSet *set = [NSCharacterSet URLFragmentAllowedCharacterSet];
+        NSString * encodedUrl = [uploadUrl stringByAddingPercentEncodingWithAllowedCharacters:set];
+        NSURL *requestUrl = [NSURL URLWithString: encodedUrl];
         if (requestUrl == nil) {
             @throw @"Request cannot be nil";
         }
