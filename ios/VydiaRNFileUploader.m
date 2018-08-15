@@ -18,6 +18,7 @@ RCT_EXPORT_MODULE();
 static int uploadId = 0;
 static RCTEventEmitter* staticEventEmitter = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
+static NSString *SHARED_CONTAINER_IDENTIFIER = @"group.io.pararam";
 NSURLSession *_urlSession = nil;
 
 + (BOOL)requiresMainQueueSetup {
@@ -161,7 +162,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
         if (requestUrl == nil) {
             @throw @"Request cannot be nil";
         }
-        
+
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:requestUrl];
         [request setHTTPMethod: method];
 
@@ -207,7 +208,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
                 reject(@"RN Uploader", @"Parameters supported only in multipart type", nil);
                 return;
             }
-            
+
             uploadTask = [[self urlSession] uploadTaskWithRequest:request fromFile:[NSURL URLWithString: fileURI]];
         }
 
@@ -272,6 +273,7 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 - (NSURLSession *)urlSession {
     if (_urlSession == nil) {
         NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKGROUND_SESSION_ID];
+        sessionConfiguration.sharedContainerIdentifier = @"group.io.pararam";
         _urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
     }
 
