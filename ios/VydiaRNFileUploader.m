@@ -230,7 +230,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
 RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
         for (NSURLSessionTask *uploadTask in uploadTasks) {
-            if (uploadTask.taskDescription == cancelUploadId) {
+            if ([uploadTask.taskDescription isEqualToString:cancelUploadId]) {
                 [uploadTask cancel];
             }
         }
