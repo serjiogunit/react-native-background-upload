@@ -201,8 +201,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSData *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
             [request setHTTPBody: httpBody];
 
-            // I am sorry about warning, but Upload tasks from NSData are not supported in background sessions.
-            uploadTask = [[self urlSession] uploadTaskWithRequest:request fromData: nil];
+            uploadTask = [[self urlSession] uploadTaskWithStreamedRequest:request];
         } else {
             if (parameters.count > 0) {
                 reject(@"RN Uploader", @"Parameters supported only in multipart type", nil);
@@ -230,7 +229,8 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
 RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
         for (NSURLSessionTask *uploadTask in uploadTasks) {
-            if ([uploadTask.taskDescription isEqualToString:cancelUploadId]) {
+            if ([uploadTask.taskDescription isEqualToString:cancelUploadId]){
+                // == checks if references are equal, while isEqualToString checks the string value
                 [uploadTask cancel];
             }
         }

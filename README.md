@@ -69,7 +69,7 @@ Note: if you are installing on React Native < 0.47, use `react-native-background
 
 ## 3. Expo
 
-To use this library with [Expo](https://expo.io) one must first detach (eject) the project and follow the normal `react-native link` instructions. Additionally on iOS there is a must to add a Header Search Path to other dependencies which are managed using Pods. To do so one has to add `$(SRCROOT)/../../../ios/Pods/Headers/Public` to Header Search Path in `VydiaRNFileUploader` module using XCode. 
+To use this library with [Expo](https://expo.io) one must first detach (eject) the project and follow [step 2](#2-link-native-code) instructions. Additionally on iOS there is a must to add a Header Search Path to other dependencies which are managed using Pods. To do so one has to add `$(SRCROOT)/../../../ios/Pods/Headers/Public` to Header Search Path in `VydiaRNFileUploader` module using XCode. 
 
 # Usage
 
@@ -153,7 +153,24 @@ Returns a promise with the string ID of the upload.  Will reject if there is a c
 |`headers`|object|Optional||HTTP headers|`{ 'Accept': 'application/json' }`|
 |`field`|string|Required if `type: 'multipart'`||The form field name for the file.  Only used when `type: 'multipart`|`uploaded-file`|
 |`parameters`|object|Optional||Additional form fields to include in the HTTP request. Only used when `type: 'multipart`||
-|`notification`|object with single `enabled` field|Optional||Android only.  |`{ enabled: false }`|
+|`notification`|Notification object (see below)|Optional||Android only.  |`{ enabled: true, onProgressTitle: "Uploading...", autoClear: true }`|
+
+### Notification Object (Android Only)
+|Name|Type|Required|Description|Example|
+|---|---|---|---|---|
+|`enabled`|boolean|Optional|Enable or diasable notifications|`{ enabled: true }`|
+|`autoClear`|boolean|Optional|Autoclear notification on complete|`{ autoclear: true }`|
+|`notificationChannel`|string|Optional|Sets android notificaion channel|`{ notificationChannel: "My-Upload-Service" }`|
+|`enableRingTone`|boolean|Optional|Sets whether or not to enable the notification sound when the upload gets completed with success or error|`{ enableRingTone: true }`|
+|`onProgressTitle`|string|Optional|Sets notification progress title|`{ onProgressTitle: "Uploading" }`|
+|`onProgressMessage`|string|Optional|Sets notification progress message|`{ onProgressMessage: "Uploading new video" }`|
+|`onCompleteTitle`|string|Optional|Sets notification complete title|`{ onCompleteTitle: "Upload finished" }`|
+|`onCompleteMessage`|string|Optional|Sets notification complete message|`{ onCompleteMessage: "Your video has been uploaded" }`|
+|`onErrorTitle`|string|Optional|Sets notification error title|`{ onErrorTitle: "Upload error" }`|
+|`onErrorMessage`|string|Optional|Sets notification error message|`{ onErrorMessage: "An error occured while uploading a video" }`|
+|`onCancelledTitle`|string|Optional|Sets notification cancelled title|`{ onCancelledTitle: "Upload cancelled" }`|
+|`onCancelledMessage`|string|Optional|Sets notification cancelled message|`{ onCancelledMessage: "Video upload was cancelled" }`|
+
 
 ### getFileInfo(path)
 
@@ -188,6 +205,8 @@ Adds an event listener, possibly confined to a single upload.
 `uploadId` The upload ID from `startUpload` to filter events for.  If null, this will include all uploads.
 
 `listener` Function to call when the event occurs.
+
+Returns an [EventSubscription](https://github.com/facebook/react-native/blob/master/Libraries/vendor/emitter/EmitterSubscription.js). To remove the listener, call `remove()` on the `EventSubscription`.
 
 ## Events
 
@@ -226,6 +245,35 @@ Event Data
 |Name|Type|Required|Description|
 |---|---|---|---|
 |`id`|string|Required|The ID of the upload.|
+
+# Customizing Android Build Properties
+You may want to customize the `compileSdk, buildToolsVersion, and targetSdkVersion` versions used by this package.  For that, add this to `android/build.gradle`:
+
+```
+ext {
+    targetSdkVersion = 23
+    compileSdkVersion = 23
+    buildToolsVersion = '23.0.2'
+}
+```
+
+Add it above `allProjects` and you're good.  Your `android/build.gradle` might then resemble:
+```
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+ext {
+    targetSdkVersion = 27
+    compileSdkVersion = 27
+    buildToolsVersion = '23.0.2'
+}
+
+allprojects {
+
+```
 
 # FAQs
 
@@ -288,19 +336,6 @@ Then open your app's `android/app/build.gradle` file.
 Ensure `compileSdkVersion` and `targetSdkVersion` are 25.
 
 Done!
-
-## Known issues
-
-Android APK 27 and above require notifications to provide their own `NotificationChannel`. `react-native-background-upload` does not yet meet this requirement and thus [will cause crashes in Android 8.1 and above](https://github.com/Vydia/react-native-background-upload/issues/59#issuecomment-362476703). This issue can be avoided by electing not to use native notifications.
-
-```js
-const options = {
-  // ...
-  notification: {
-    enabled: false,
-  },
-};
-```
 
 
 ## Gratitude
