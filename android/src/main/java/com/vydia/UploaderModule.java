@@ -1,7 +1,10 @@
 package com.vydia.RNUploader;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import android.os.Build;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -260,6 +263,19 @@ public class UploaderModule extends ReactContextBaseJavaModule {
 
         request.setNotificationConfig(notificationConfig);
 
+      } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          NotificationManager notificationManager = (NotificationManager) this.getReactApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+          checkOrCreateChannel(notificationManager);
+
+          UploadNotificationConfig notificationConfig = new UploadNotificationConfig();
+
+          if (notification.hasKey("notificationChannel")){
+            notificationConfig.setNotificationChannelId(NOTIFICATION_CHANNEL_ID);
+          }
+
+          request.setNotificationConfig(notificationConfig);
+        }
       }
 
       if (options.hasKey("parameters")) {
@@ -324,4 +340,22 @@ public class UploaderModule extends ReactContextBaseJavaModule {
     }
   }
 
+  private static final String NOTIFICATION_CHANNEL_ID = "com.vydia.RNUploader";
+
+  private static boolean channelCreated = false;
+    private static void checkOrCreateChannel(NotificationManager manager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            return;
+        if (channelCreated)
+            return;
+        if (manager == null)
+            return;
+
+        final CharSequence name = "com-vydia-rnuploader-channel";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+
+        manager.createNotificationChannel(channel);
+        channelCreated = true;
+    }
 }
